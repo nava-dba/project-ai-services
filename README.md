@@ -53,6 +53,7 @@ project-ai-services/
 │   ├── common/        # Shared library
 │   ├── chatbot/       # RAG chatbot service
 │   ├── digitize/      # Document ingestion
+│   ├── extract/       # Structured data extraction
 │   ├── summarize/     # Summarization service
 │   └── similarity/    # Similarity search
 ├── ui/                # Frontend applications
@@ -66,6 +67,15 @@ project-ai-services/
 │   ├── caddy/         # Caddy proxy
 │   └── tools/         # Utility tools
 └── ai-services/       # CLI tool
+    └── assets/
+        ├── applications/
+        │   ├── rag/          # Full RAG stack (OpenShift + Podman)
+        │   ├── rag-cpu/      # RAG stack (CPU-only Podman)
+        │   ├── rag-dev/      # RAG dev variant
+        │   └── embedding/    # CLIP embedding sidecar (Podman, ppc64le)
+        └── architectures/
+            ├── rag/          # RAG architecture definition
+            └── embedding/    # Oracle AI vector search architecture
 ```
 
 ### Service Architecture
@@ -82,6 +92,9 @@ The repository follows a microservices architecture with:
 - `digitize-service` - Document ingestion and processing
 - `summarize-service` - Text summarization
 - `similarity-service` - Semantic similarity search
+
+**Embedding Application (Podman / ppc64le):**
+- `embedding` - Standalone CLIP ViT-B/32 embedding sidecar running on IBM Power (ppc64le). Exposes a standard OpenAI-compatible `POST /v1/embeddings` endpoint consumable by any application, RAG pipeline, Python service, or database over plain HTTP. No OpenSearch or RAG pipeline required — single Podman pod. See [embedding README](ai-services/assets/applications/embedding/README.md) and [Installation Guide](docs/INSTALLATION.md#embedding-service) for full setup steps.
 
 **UI Images:**
 - `chatbot-ui` - Chatbot web interface

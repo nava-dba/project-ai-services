@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# Architecture identification
+id: embedding
+name: "Oracle AI vector search"
+description: "Deploys a multimodal embedding service on IBM Power so Oracle 26ai on AIX can generate and store vectors directly from PL/SQL; enables image and text similarity search using Oracle VECTOR columns and VECTOR_DISTANCE()."
+version: "1.0.0"
+type: architecture
+
+# Certification and support
+certified_by: "IBM"
+runtimes:
+  - podman
+
+# No global shared components — single self-contained embedding service
+global_components: []
+
+# Service composition
+services:
+  - id: clip-embedding
+    version: ">=1.0.0"
+
+about:
+  - title: "Services"
+    values:
+      - "CLIP Embedding (text + image → 512-d vector)"
+
+  - title: "Use case domains"
+    sections:
+      - title: "Retail"
+        values:
+          - "Fashion product similarity search"
+          - "Visual product discovery"
+          - "Text-to-product semantic search"
+      - title: "Oracle Database"
+        values:
+          - "Oracle 26ai VECTOR column population via UTL_HTTP"
+          - "HNSW index similarity search with VECTOR_DISTANCE()"
+          - "Multimodal search (text and image in same vector space)"
+
+  - title: "Minimum resource allocation"
+    sections:
+      - title: "Required cores"
+        value: "16"
+      - title: "Required memory"
+        value: "6 GB"
+      - title: "Required Spyre cards"
+        value: "0 (CPU-only)"
+      - title: "Platform"
+        value: "IBM Power11 ppc64le, RHEL 9"
+
+  - title: "Code and architecture"
+    sections:
+      - title: "Source code"
+        ctaLabel: "View source code"
+        url: "https://github.com/IBM/project-ai-services"
+
+  - title: "Integration"
+    sections:
+      - title: "Oracle 26ai on AIX"
+        description: "Call the sidecar directly from Oracle PL/SQL using UTL_HTTP. No middleware required."
+        values:
+          - "POST /v1/embeddings — text input array format"
+          - "POST /v1/embeddings — image messages/image_url format"
+          - "Returns 512-d float32 vectors compatible with Oracle VECTOR(512, FLOAT32)"

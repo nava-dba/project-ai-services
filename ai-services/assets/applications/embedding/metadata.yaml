@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: embedding
+description: "Minimal CLIP embedding sidecar for Oracle 26ai on IBM AIX Power. Exposes a single OpenAI-compatible POST /v1/embeddings endpoint on a host port so Oracle PL/SQL (UTL_HTTP) can call it to generate 512-d vectors for image and text data."

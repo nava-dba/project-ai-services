@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+
+hosts:
+  - fetch: HOST_IP
+    type: ip
+
+pods:
+  - name: "{{ .AppName }}--embedding"
+    format: "index .Ports \"8001/tcp\" 0"
+    default: ""
+    alias: CLIP_PORT
+
+containers:
+  - name: "{{ .AppName }}--embedding-embedding"
+    format: ".Status"
+    alias: CLIP_STATUS

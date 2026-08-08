@@ -1,0 +1,79 @@
+# SPDX-License-Identifier: Apache-2.0
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .AppName }}--embedding"
+  labels:
+    ai-services.io/application: "{{ .AppName }}"
+    ai-services.io/template: "{{ .AppTemplateName }}"
+    ai-services.io/version: "{{ .Version }}"
+  annotations:
+    # Exposes containerPort 8001 on a host port reachable from Oracle AIX (UTL_HTTP)
+    ai-services.io/ports: "{{ or .Values.clip.port "" }}:8001"
+    ai-services.io/model1: {{ .Values.clip.model.name }}
+    io.podman.annotations.ulimit: "nofile=65536:65536"
+spec:
+  restartPolicy: always
+  volumes:
+    - name: models
+      hostPath:
+        path: "{{ .BaseDir }}/models"
+        type: Directory
+    - name: shm
+      emptyDir:
+        medium: Memory
+        sizeLimit: "2Gi"
+    - name: vllm-ipc
+      emptyDir:
+        medium: Memory
+        sizeLimit: "64Mi"
+  containers:
+    - name: embedding
+      image: "{{ .Values.clip.image }}"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      args:
+        - --model
+        - /models/{{ .Values.clip.model.name }}
+        - --served-model-name
+        - clip-vit-base-patch32
+        - --dtype
+        - float32
+        - --port=8001
+      env:
+        - name: VLLM_RPC_BASE_PATH
+          value: "/run/vllm_ipc"
+        - name: VLLM_WORKER_MULTIPROC_METHOD
+          value: "fork"
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "1"
+        - name: OMP_NUM_THREADS
+          value: "16"
+      resources:
+        requests:
+          memory: "6Gi"
+        limits:
+          memory: "6Gi"
+      ports:
+        - containerPort: 8001
+          protocol: TCP
+      volumeMounts:
+        - mountPath: /models
+          name: models
+          readOnly: true
+        - mountPath: /dev/shm
+          name: shm
+        - mountPath: /run/vllm_ipc
+          name: vllm-ipc
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8001
+        initialDelaySeconds: 120
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 6

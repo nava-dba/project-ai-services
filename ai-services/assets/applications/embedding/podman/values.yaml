@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+
+clip:
+  # @description Host port for the CLIP embedding service. Oracle PL/SQL (UTL_HTTP) calls this port on the Linux LPAR.
+  #              If unspecified, a random available port is assigned.
+  port: ""
+  # @hidden
+  image: icr.io/ppc64le-oss/vllm-ppc64le:0.19.1
+  model:
+    # @hidden — CLIP ViT-B/32: 512-d vectors, dual-modal (image + text)
+    name: openai/clip-vit-base-patch32
+    # @hidden — CLIP text tokenizer hard limit
+    maxModelLen: 77

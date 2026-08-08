@@ -3,6 +3,16 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "image": {
+      "type": "string",
+      "description": "vLLM container image",
+      "default": "icr.io/ppc64le-oss/vllm-ppc64le:0.19.1"
+    },
+    "port": {
+      "type": "string",
+      "description": "Host port for the embedding service. Leave empty to assign a random available port.",
+      "default": ""
+    },
     "model": {
       "type": "string",
       "title": "Embedding model",

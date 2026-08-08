@@ -13,3 +13,10 @@ vendor
 # Coverage reports
 .coverage
 coverage.xml
+Ai-service-master
+Step-by-Step-install-ai-service
+aiservices-podman-dev-guide.md
+index.html
+oracle_ai_aix_native_architecture.xml
+oracle_ai_aix_ibm_ai_services_architecture.drawio
+benchmark

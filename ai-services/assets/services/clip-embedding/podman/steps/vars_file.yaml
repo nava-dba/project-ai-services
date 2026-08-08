@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: Apache-2.0
+
+hosts:
+  - fetch: HOST_IP
+    type: ip
+
+pods:
+  - name: "{{ .AppName }}--embedding"
+    format: "index .Ports \"8001/tcp\" 0"
+    default: ""
+    alias: EMBEDDING_PORT
+
+containers:
+  - name: "{{ .AppName }}--embedding-embedding"
+    format: ".Status"
+    alias: EMBEDDING_STATUS
+
+params:
+  - name: model
+    alias: EMBEDDING_MODEL
+    default: "openai/clip-vit-base-patch32"

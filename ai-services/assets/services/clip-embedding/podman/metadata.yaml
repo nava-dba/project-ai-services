@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+name: embedding
+version: "1.0.0"
+
+# Resource requirements
+resources:
+  cpu: 16                  # 16 OMP threads for CLIP inference
+  memory: 6442450944       # 6Gi in bytes
+  storage: 2147483648      # 2Gi in bytes (model files)

@@ -13,6 +13,10 @@ spec:
       hostPath:
         path: "{{ .BaseDir }}/models"
         type: Directory
+    - name: vllm-ipc
+      emptyDir:
+        medium: Memory
+        sizeLimit: "64Mi"
   containers:
     - name: embedding
       image: "{{ .Values.image }}"
@@ -21,6 +25,8 @@ spec:
       - /models/{{ .Values.model }}
       - --served-model-name
       - {{ .Values.model }}
+      - --dtype
+      - float32
       - --port=8001
       livenessProbe:
         httpGet:
@@ -31,16 +37,24 @@ spec:
         timeoutSeconds: 5
         failureThreshold: 3
       env:
+        - name: VLLM_CPU_KVCACHE_SPACE
+          value: "1"
+        - name: VLLM_WORKER_MULTIPROC_METHOD
+          value: "fork"
+        - name: VLLM_RPC_BASE_PATH
+          value: "/run/vllm_ipc"
         - name: OMP_NUM_THREADS
           value: "16"
       resources:
         requests:
-          memory: "4Gi"
+          memory: "6Gi"
         limits:
-          memory: "4Gi"
+          memory: "6Gi"
       ports:
         - containerPort: 8001
       volumeMounts:
         - mountPath: /models:z
           name: models
           readOnly: true
+        - mountPath: /run/vllm_ipc
+          name: vllm-ipc

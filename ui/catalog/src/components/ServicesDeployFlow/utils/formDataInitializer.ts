@@ -6,9 +6,11 @@ export const initializeFormData = (
   selectedServiceId: string,
   componentModels?: Record<string, LLMOption[]>,
 ): DeployFormData => {
+  const serviceVersion = deployOptions.version || "1.0.0";
+
   const formData: DeployFormData = {
     name: "Service deployment",
-    version: deployOptions.version,
+    version: serviceVersion,
     globalComponents: {}, // Empty for service deployments
     services: {},
   };
@@ -16,7 +18,7 @@ export const initializeFormData = (
   // Initialize the selected service with ALL components from API
   const serviceConfig: ServiceConfig = {
     enabled: true,
-    version: deployOptions.version,
+    version: serviceVersion,
     components: {},
     params: {},
   };

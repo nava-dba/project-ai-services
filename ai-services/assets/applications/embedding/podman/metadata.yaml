@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: embedding
+version: "1.0.0"
+description: "Minimal CLIP embedding sidecar for Oracle 26ai on IBM AIX Power. Single pod — no vector DB, no RAG pipeline."
+podTemplateExecutions:
+  - [clip-embedding.yaml.tmpl]

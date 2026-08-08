@@ -196,24 +196,26 @@ export const StepOne: React.FC<StepProps> = ({
             </div>
           </Column>
 
-          {/* Version field - always shown */}
-          <Column sm={4} md={8} lg={16}>
-            <div className={styles.formField}>
-              <Dropdown
-                id="assistant-version"
-                titleText="Digital assistant version"
-                label="Select version"
-                items={versionOptions}
-                itemToString={(item) => (item ? item.text : "")}
-                selectedItem={
-                  versionOptions.find((v) => v.id === formData.version) || null
-                }
-                onChange={({ selectedItem }) =>
-                  onChange({ version: selectedItem?.id || "" })
-                }
-              />
-            </div>
-          </Column>
+          {/* Version field - only shown when multiple versions are available */}
+          {versionOptions.length > 1 && (
+            <Column sm={4} md={8} lg={16}>
+              <div className={styles.formField}>
+                <Dropdown
+                  id="assistant-version"
+                  titleText="Service version"
+                  label="Select version"
+                  items={versionOptions}
+                  itemToString={(item) => (item ? item.text : "")}
+                  selectedItem={
+                    versionOptions.find((v) => v.id === formData.version) || null
+                  }
+                  onChange={({ selectedItem }) =>
+                    onChange({ version: selectedItem?.id || "" })
+                  }
+                />
+              </div>
+            </Column>
+          )}
 
           {/* Dynamic service components - ALL components from API */}
           {serviceComponentsData?.map((component) => (

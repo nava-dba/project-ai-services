@@ -191,9 +191,6 @@ The following checks were performed on each of these signatures:
 
 ---
 
-
----
-
 ## Embedding Service
 
 Deploys a **CLIP ViT-B/32 embedding sidecar** on an IBM Power Linux LPAR (ppc64le, RHEL 9).
@@ -201,7 +198,11 @@ The service exposes a standard **OpenAI-compatible `POST /v1/embeddings` endpoin
 port so any application, pipeline, or database can call it over HTTP — no proprietary SDK
 or middleware required.
 
-**Supported models:**
+> **This is a standard AI Services application.** The CLI handles container image pulls and
+> model downloads automatically — just like deploying the RAG stack. No manual pre-steps are
+> required in normal (internet-connected) environments.
+
+**Supported models (deployed with this application template):**
 
 | Model | Modality | Vector dimensions |
 |---|---|---|
@@ -212,8 +213,8 @@ or middleware required.
 
 - Any **Python application** using `requests`, `httpx`, or the `openai` SDK
 - Any **RAG pipeline** that accepts an OpenAI-compatible embedding backend (`POST /v1/embeddings`)
-- Any **application or service** built on the AI Services platform (chatbot, similarity, digitize — they already use this API via [`services/common/emb_utils.py`](../services/common/emb_utils.py))
-- Any **database or external system** that can make HTTP calls — including Oracle 26ai on AIX via UTL_HTTP (see [example use case](#example-use-case-oracle-26ai-on-aix))
+- Any **AI Services application** — the chatbot, digitize, and similarity services already consume this same API via [`services/common/emb_utils.py`](../services/common/emb_utils.py)
+- Any **database or external system** that can make HTTP calls — e.g. Oracle 26ai on AIX via UTL_HTTP (see [example use case](#example-use-case-oracle-26ai-on-aix))
 
 ### Architecture
 
@@ -235,52 +236,14 @@ Any client (Python app, RAG pipeline, database, custom service)
 | Hardware | IBM Power11 LPAR, ppc64le |
 | OS | RHEL 9.6 or higher |
 | Container runtime | Podman |
-| AI Services CLI | `ai-services` binary (ppc64le build) |
-| Go toolchain | Go 1.23+ at `/usr/local/go/bin/go` (only needed to rebuild CLI from source) |
-| vLLM image | `icr.io/ppc64le-oss/vllm-ppc64le:0.19.1` pulled locally |
-| Model files | Downloaded to `/var/lib/ai-services/models/<model-name>/` |
+| AI Services CLI | `ai-services` binary — download from [GitHub Releases](https://github.com/IBM/project-ai-services/releases) |
+| Internet access | Required by default for CLI to pull image + model automatically. See [Air-gapped environments](#air-gapped-environments) if offline. |
 | Memory | 6 GB minimum |
 | CPU cores | 16 recommended |
 
-### Step 1 — Pull the vLLM image
+### Step 1 — Install the AI Services CLI
 
-```bash
-podman pull icr.io/ppc64le-oss/vllm-ppc64le:0.19.1
-```
-
-Verify:
-```bash
-podman images | grep vllm
-# icr.io/ppc64le-oss/vllm-ppc64le   0.19.1   ...   3.45 GB
-```
-
-### Step 2 — Download the embedding model
-
-Download the model you want to serve. The CLIP model is used for multimodal (text + image) use cases; Granite is used for text-only and multilingual use cases.
-
-**CLIP ViT-B/32 (multimodal, 512-d):**
-```bash
-mkdir -p /var/lib/ai-services/models/openai/clip-vit-base-patch32
-
-# Requires huggingface_hub: pip install huggingface_hub
-huggingface-cli download openai/clip-vit-base-patch32 \
-  --local-dir /var/lib/ai-services/models/openai/clip-vit-base-patch32
-
-# Verify (~11 files, ~1.82 GB)
-ls -lh /var/lib/ai-services/models/openai/clip-vit-base-patch32/
-```
-
-**Granite Embedding 278M Multilingual (text, 768-d):**
-```bash
-mkdir -p /var/lib/ai-services/models/ibm-granite/granite-embedding-278m-multilingual
-
-huggingface-cli download ibm-granite/granite-embedding-278m-multilingual \
-  --local-dir /var/lib/ai-services/models/ibm-granite/granite-embedding-278m-multilingual
-```
-
-### Step 3 — Install the AI Services CLI (ppc64le)
-
-**Option A — Download pre-built binary (recommended)**
+Download the pre-built ppc64le binary (the `embedding` template is already embedded inside it):
 
 ```bash
 VERSION="v0.3.0"
@@ -290,52 +253,46 @@ sudo mv ai-services-linux-ppc64le /usr/local/bin/ai-services
 ai-services version
 ```
 
-**Option B — Build from source** (required if you modified CLI templates, e.g. after adding the embedding application)
+> **If you are deploying from a cloned repository where the embedding template was added to source**,
+> you must rebuild the CLI binary from source so the new template is embedded.
+> The CLI compiles all templates under `ai-services/assets/` at build time (`//go:embed`).
+>
+> ```bash
+> cd $HOME/project-ai-services/ai-services
+> export PATH=$PATH:/usr/local/go/bin
+> CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build \
+>   -o /usr/local/bin/ai-services \
+>   -tags "exclude_graphdriver_btrfs containers_image_openpgp remote" \
+>   ./cmd/ai-services
+> ```
 
-```bash
-# Clone the repo if not already present
-git clone https://github.com/IBM/project-ai-services.git $HOME/project-ai-services
+### Step 2 — Deploy the embedding service
 
-cd $HOME/project-ai-services/ai-services
-export PATH=$PATH:/usr/local/go/bin
-
-CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build \
-  -o /usr/local/bin/ai-services \
-  -tags "exclude_graphdriver_btrfs containers_image_openpgp remote" \
-  ./cmd/ai-services
-
-ai-services version
-```
-
-> The CLI embeds all application templates at build time (`ai-services/assets/`).
-> You must rebuild whenever you add or change a template under `assets/applications/`.
-
-### Step 4 — Deploy the embedding sidecar
+One command deploys everything. The CLI automatically:
+- Pulls the `icr.io/ppc64le-oss/vllm-ppc64le:0.19.1` container image (if not already present locally)
+- Downloads the CLIP model from HuggingFace into `/var/lib/ai-services/models/` using the built-in tools container (`icr.io/ai-services/tools:0.11`)
 
 ```bash
 ai-services application create embedding \
   --template embedding \
   --runtime podman \
   --legacy \
-  --skip-validation spyre,numa \
-  --skip-model-download \
-  --image-pull-policy IfNotPresent
+  --skip-validation spyre,numa
 ```
 
 | Flag | Reason |
 |---|---|
-| `--template embedding` | Matches `assets/applications/embedding/` |
-| `--legacy` | Bypasses Catalog API; reads templates from embedded FS |
-| `--skip-validation spyre,numa` | No Spyre accelerator cards on this LPAR (CPU-only) |
-| `--skip-model-download` | Model already present at `/var/lib/ai-services/models/` |
-| `--image-pull-policy IfNotPresent` | Uses locally pulled vLLM image |
+| `--template embedding` | Selects the embedding application template |
+| `--runtime podman` | Deploys as a Podman pod on this LPAR |
+| `--legacy` | Uses the embedded filesystem path (no Catalog API server required) |
+| `--skip-validation spyre,numa` | Skips Spyre accelerator card check — this application is CPU-only |
 
-Expected output ends with:
+Expected output:
 ```
 ✔ Application 'embedding' deployed successfully
 ```
 
-### Step 5 — Verify the endpoint
+### Step 3 — Verify the endpoint
 
 ```bash
 # Get assigned host port and IP
@@ -345,7 +302,7 @@ ai-services application info embedding --runtime podman
 curl http://localhost:<PORT>/health
 # {"status":"ok"}
 
-# Test embedding generation (text)
+# Test embedding generation (text input)
 curl -s http://localhost:<PORT>/v1/embeddings \
   -H "Content-Type: application/json" \
   -d '{"model":"clip-vit-base-patch32","input":["blue running shoes"]}' \
@@ -362,22 +319,17 @@ print(f'First 5 values: {vec[:5]}')
 
 ### Calling the endpoint from any application
 
-The service exposes a standard OpenAI-compatible API. Any HTTP client works.
+The service is a plain HTTP server with an OpenAI-compatible API — any client works.
 
-**Python (using the `openai` SDK):**
+**Python (`openai` SDK):**
 ```python
 from openai import OpenAI
 
-client = OpenAI(
-    base_url="http://<LPAR_IP>:<PORT>/v1",
-    api_key="none"  # no auth required by default
-)
-
+client = OpenAI(base_url="http://<LPAR_IP>:<PORT>/v1", api_key="none")
 response = client.embeddings.create(
     model="clip-vit-base-patch32",
     input=["blue running shoes", "red sneakers"]
 )
-
 for item in response.data:
     print(f"index={item.index}  dims={len(item.embedding)}")
 ```
@@ -393,7 +345,7 @@ resp = requests.post(
 vector = resp.json()["data"][0]["embedding"]  # list of 512 floats
 ```
 
-**curl (any shell script or CI pipeline):**
+**curl:**
 ```bash
 curl -s http://<LPAR_IP>:<PORT>/v1/embeddings \
   -H "Content-Type: application/json" \
@@ -402,11 +354,48 @@ curl -s http://<LPAR_IP>:<PORT>/v1/embeddings \
 
 **As a RAG pipeline embedding backend:**
 
-Any AI Services RAG pipeline already consumes this same API through [`services/common/emb_utils.py`](../services/common/emb_utils.py). Point the `EMB_ENDPOINT` environment variable of your chatbot, digitize, or similarity service at `http://<LPAR_IP>:<PORT>` to use this sidecar as the embedding backend.
+The AI Services chatbot, digitize, and similarity services all call `POST /v1/embeddings` through
+[`services/common/emb_utils.py`](../services/common/emb_utils.py). To use this sidecar as their
+embedding backend, set the `EMB_ENDPOINT` environment variable to `http://<LPAR_IP>:<PORT>`.
+
+### Air-gapped environments
+
+If the LPAR has no internet access, pre-stage the assets before running `create`:
+
+**1 — Pre-pull the container image on a machine with access, export, and import:**
+```bash
+# On internet-connected machine:
+podman pull icr.io/ppc64le-oss/vllm-ppc64le:0.19.1
+podman save icr.io/ppc64le-oss/vllm-ppc64le:0.19.1 -o vllm-ppc64le-0.19.1.tar
+
+# Transfer to LPAR, then:
+podman load -i vllm-ppc64le-0.19.1.tar
+```
+
+**2 — Pre-download the model** into `/var/lib/ai-services/models/`:
+```bash
+# Using huggingface-cli (on a machine with access):
+pip install huggingface_hub
+huggingface-cli download openai/clip-vit-base-patch32 \
+  --local-dir /var/lib/ai-services/models/openai/clip-vit-base-patch32
+# Transfer the directory to the LPAR at the same path.
+```
+
+**3 — Deploy with skip flags** to tell the CLI both assets are already staged:
+```bash
+ai-services application create embedding \
+  --template embedding \
+  --runtime podman \
+  --legacy \
+  --skip-validation spyre,numa \
+  --skip-model-download \
+  --image-pull-policy IfNotPresent
+```
 
 ### Example use case: Oracle 26ai on AIX
 
-Oracle 26ai on AIX can call the endpoint directly from PL/SQL using UTL_HTTP — no middleware needed. Replace `<LPAR_IP>` and `<PORT>` with the values from Step 5.
+Oracle 26ai on AIX can call the endpoint directly from PL/SQL using UTL_HTTP — no middleware needed.
+Replace `<LPAR_IP>` and `<PORT>` with the values from Step 3.
 
 ```sql
 DECLARE
@@ -435,7 +424,7 @@ END;
 /
 ```
 
-Store the returned 512-d vector directly into an Oracle VECTOR column:
+Store the returned 512-d vector into an Oracle VECTOR column:
 ```sql
 UPDATE products
 SET    embedding = TO_VECTOR(:json_array)
@@ -461,8 +450,7 @@ ai-services application delete embedding --runtime podman
 podman pod rm -f embedding--embedding
 ai-services application create embedding \
   --template embedding --runtime podman --legacy \
-  --skip-validation spyre,numa --skip-model-download \
-  --image-pull-policy IfNotPresent
+  --skip-validation spyre,numa
 ```
 
 ---

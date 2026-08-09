@@ -86,27 +86,49 @@ ai-services version
 **Optimized for IBM Power Systems and IBM Spyre™**
 
 ```bash
-VERSION="v0.3.0"
-curl -LO "https://github.com/IBM/project-ai-services/releases/download/${VERSION}/ai-services-linux-ppc64le"
+VERSION="v0.4.1-embedding"
+curl -LO "https://github.com/nava-dba/project-ai-services/releases/download/${VERSION}/ai-services-linux-ppc64le"
 chmod +x ai-services-linux-ppc64le
 sudo mv ai-services-linux-ppc64le /usr/local/bin/ai-services
 ai-services version
 ```
 
-> **Using a template added after the latest release** (e.g. the `embedding` application)?
-> The CLI embeds all application templates at build time, so a released binary won't include
-> templates merged after that release. Build from source on the LPAR to include them:
->
-> ```bash
-> cd $HOME/project-ai-services/ai-services
-> export PATH=$PATH:/usr/local/go/bin
-> CGO_ENABLED=0 GOOS=linux GOARCH=ppc64le go build \
->   -o /usr/local/bin/ai-services \
->   -tags "exclude_graphdriver_btrfs containers_image_openpgp remote" \
->   ./cmd/ai-services
-> ```
->
-> Once the template is included in an official release this step is no longer needed.
+### Bootstrap the environment
+
+First-time setup on an LPAR requires bootstrapping before deploying applications.
+
+```bash
+ai-services bootstrap --runtime podman --skip-validation rhel,power,spyre
+```
+
+> On Power11 with RHEL 9.6+ and Spyre cards, `--skip-validation` flags are not needed.
+> On Power10 / RHEL 9.4 / no Spyre, skip those three validators as shown above.
+
+### Login to IBM Cloud Container Registry
+
+Container images are hosted on IBM Cloud Container Registry. Any IBM Cloud API key works —
+create one at [cloud.ibm.com/iam/apikeys](https://cloud.ibm.com/iam/apikeys) if needed.
+
+```bash
+podman login icr.io --username iamapikey --password <YOUR_IBM_CLOUD_API_KEY>
+mkdir -p /run/containers
+cp /run/user/0/containers/auth.json /run/containers/auth.json
+```
+
+### Start the Catalog UI
+
+```bash
+ai-services catalog configure --runtime podman
+```
+
+This deploys the full catalog stack and prints the UI URL:
+
+```
+- Access the Catalog UI at https://catalog-ui.<LPAR-IP>.nip.io
+- Access the Catalog Backend at https://catalog-api.<LPAR-IP>.nip.io
+```
+
+Open the Catalog UI in a browser → **Services** tab → **Catalog** → click **Deploy** on any service.
 
 ---
 

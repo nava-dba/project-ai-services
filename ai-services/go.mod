@@ -1,6 +1,6 @@
 module github.com/project-ai-services/ai-services
 
-go 1.23
+go 1.25.7
 
 toolchain go1.25.9
 

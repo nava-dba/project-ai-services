@@ -45,8 +45,8 @@ Any client (Python app, RAG pipeline, database, shell script, …)
 
 | Requirement | Detail |
 |---|---|
-| Hardware | IBM Power11 LPAR, ppc64le |
-| OS | RHEL 9.6 or higher |
+| Hardware | IBM Power LPAR, ppc64le (Power10 / Power11) |
+| OS | RHEL 9.4 or higher |
 | Container runtime | Podman |
 | AI Services CLI | `ai-services` binary — see [Step 1](#step-1--install-the-ai-services-cli) |
 | Internet access | Required by default; see [Air-gapped environments](#air-gapped-environments) if offline |
@@ -60,8 +60,8 @@ Any client (Python app, RAG pipeline, database, shell script, …)
 Download the pre-built ppc64le binary. The `embedding` template is already compiled inside it:
 
 ```bash
-VERSION="v0.3.0"
-curl -LO "https://github.com/IBM/project-ai-services/releases/download/${VERSION}/ai-services-linux-ppc64le"
+VERSION="v0.4.3-embedding"
+curl -LO "https://github.com/nava-dba/project-ai-services/releases/download/${VERSION}/ai-services-linux-ppc64le"
 chmod +x ai-services-linux-ppc64le
 sudo mv ai-services-linux-ppc64le /usr/local/bin/ai-services
 ai-services version

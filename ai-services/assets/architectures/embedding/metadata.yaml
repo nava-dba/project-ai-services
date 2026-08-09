@@ -2,7 +2,7 @@
 
 # Architecture identification
 id: embedding
-name: "Oracle AI vector search"
+name: "Digital Assistant"
 description: "Deploys a multimodal embedding service on IBM Power so Oracle 26ai on AIX can generate and store vectors directly from PL/SQL; enables image and text similarity search using Oracle VECTOR columns and VECTOR_DISTANCE()."
 version: "1.0.0"
 type: architecture

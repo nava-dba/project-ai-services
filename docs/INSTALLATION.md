@@ -86,7 +86,7 @@ ai-services version
 **Optimized for IBM Power Systems and IBM Spyre™**
 
 ```bash
-VERSION="v0.4.1-embedding"
+VERSION="v0.4.3-embedding"
 curl -LO "https://github.com/nava-dba/project-ai-services/releases/download/${VERSION}/ai-services-linux-ppc64le"
 chmod +x ai-services-linux-ppc64le
 sudo mv ai-services-linux-ppc64le /usr/local/bin/ai-services

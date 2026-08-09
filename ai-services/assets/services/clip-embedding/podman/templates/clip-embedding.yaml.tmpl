@@ -59,12 +59,12 @@ spec:
         - containerPort: 8001
           protocol: TCP
       volumeMounts:
-        - mountPath: /models
+        - mountPath: /models:z
           name: models
           readOnly: true
         - mountPath: /dev/shm
           name: shm
-        - mountPath: /run/vllm_ipc
+        - mountPath: /run/vllm_ipc:z
           name: vllm-ipc
       livenessProbe:
         httpGet:

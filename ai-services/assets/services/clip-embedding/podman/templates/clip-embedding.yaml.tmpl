@@ -27,12 +27,6 @@ spec:
   containers:
     - name: embedding
       image: "{{ .Values.image }}"
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop: ["ALL"]
       args:
         - --model
         - /models/{{ .Values.model }}

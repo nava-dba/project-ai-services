@@ -30,12 +30,6 @@ spec:
   containers:
     - name: embedding
       image: "{{ .Values.clip.image }}"
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop: ["ALL"]
       args:
         - --model
         - /models/{{ .Values.clip.model.name }}
@@ -62,12 +56,12 @@ spec:
         - containerPort: 8001
           protocol: TCP
       volumeMounts:
-        - mountPath: /models
+        - mountPath: /models:z
           name: models
           readOnly: true
         - mountPath: /dev/shm
           name: shm
-        - mountPath: /run/vllm_ipc
+        - mountPath: /run/vllm_ipc:z
           name: vllm-ipc
       livenessProbe:
         httpGet:

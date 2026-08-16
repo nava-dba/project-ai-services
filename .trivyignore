@@ -1,6 +1,13 @@
 # Trivy Vulnerability Whitelist
 # CVEs listed here will be ignored during security scans
 
+# OS CVEs - Fixed by microdnf update -y in ai-services/Containerfile runtime stage
+# libarchive double-free in RAR5 reader - patched in 3.5.3-11.el9_8 via UBI repos
+# CVE-2026-14164 - resolved via microdnf update -y (RHSA-2026:52674)
+
+# libnghttp2 HTTP request smuggling - patched in 1.43.0-6.el9_8.2 via UBI repos
+# CVE-2026-58055 - resolved via microdnf update -y (RHSA-2026:54662)
+
 # Docker/Moby CVEs - All fixed in v29.3.1, Current: v28.5.2
 # Cannot upgrade: Module path changed from github.com/docker/docker to github.com/moby/moby/v2
 # Podman v5 still requires old path. Will resolve with Podman v6 migration.

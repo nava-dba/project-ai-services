@@ -25,9 +25,20 @@ about:
       - title: "Inference backend"
         value: "vLLM 0.19.1 on IBM Power (ppc64le)"
       - title: "Supported embedding models"
+        description: "All models are governed by APPROVED_EMBEDDING_MODELS.json. Set enabled=false to remove a model without deleting its audit record."
         values:
-          - "CLIP ViT-B/32 (openai/clip-vit-base-patch32) — multimodal image + text, 512-d"
+          - "CLIP ViT-B/32 (openai/clip-vit-base-patch32) — multimodal image + text, 512-d [default]"
           - "Granite Embedding 278M Multilingual (ibm-granite/granite-embedding-278m-multilingual) — text, 768-d"
+          - "ResNet-18 (microsoft/resnet-18) — image, 512-d"
+          - "ResNet-50 (microsoft/resnet-50) — image, 2048-d"
+          - "ResNet-101 (microsoft/resnet-101) — image, 2048-d"
+          - "ViT-Base Patch16 224 (google/vit-base-patch16-224) — image, 768-d"
+          - "ViT-Base Patch16 384 (google/vit-base-patch16-384) — image, 768-d"
+          - "ViT-Large Patch16 224 (google/vit-large-patch16-224) — image, 1024-d"
+          - "BEiT-Base Patch16 384 (microsoft/beit-base-patch16-384) — image, 768-d"
+          - "BEiT-Base Patch16 224 PT22K-FT22K (microsoft/beit-base-patch16-224-pt22k-ft22k) — image, 768-d"
+          - "BEiT-Large Patch16 224 PT22K-FT22K (microsoft/beit-large-patch16-224-pt22k-ft22k) — image, 1024-d"
+          - "all-mpnet-base-v2 (sentence-transformers/all-mpnet-base-v2) — text, 768-d"
 
   - title: "Inputs and outputs"
     sections:

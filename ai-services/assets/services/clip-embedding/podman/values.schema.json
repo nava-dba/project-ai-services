@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
+  "_comment": "Model list is governed by assets/components/embedding/APPROVED_EMBEDDING_MODELS.json. To add or remove a model, update that registry file first, then mirror the change in the oneOf array below.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -16,17 +17,67 @@
     "model": {
       "type": "string",
       "title": "Embedding model",
-      "description": "Embedding model",
+      "description": "Embedding model to deploy. All enabled models are listed in APPROVED_EMBEDDING_MODELS.json.",
       "oneOf": [
         {
           "const": "openai/clip-vit-base-patch32",
-          "title": "clip-vit-base-patch32 (CLIP multimodal)",
+          "title": "CLIP ViT-B/32 (multimodal image + text)",
           "description": "**Modalities:** Image + Text (512-d vectors for both)\n\n**Use Cases:** Image similarity search, Cross-modal retrieval, Oracle 26ai vector sidecar\n\n**Strengths:** Dual-modal (image and text in the same embedding space), Compact 512-d output, Efficient ViT-B/32 architecture"
         },
         {
           "const": "ibm-granite/granite-embedding-278m-multilingual",
-          "title": "granite-embedding-278m-multilingual",
+          "title": "Granite Embedding 278M Multilingual",
           "description": "**Languages:** Multilingual (100+ languages)\n\n**Use Cases:** Cross-lingual semantic search, Multilingual document retrieval, International content matching\n\n**Strengths:** Excellent multilingual support, Efficient 278M parameter model, Strong performance across diverse languages"
+        },
+        {
+          "const": "microsoft/resnet-18",
+          "title": "ResNet-18 (image classification)",
+          "description": "**Modalities:** Image (512-d vectors)\n\n**Use Cases:** Image feature extraction, Visual similarity search, Lightweight image embeddings\n\n**Strengths:** Very fast inference, Small footprint (11M parameters), Good baseline for image similarity tasks"
+        },
+        {
+          "const": "microsoft/resnet-50",
+          "title": "ResNet-50 (image classification)",
+          "description": "**Modalities:** Image (2048-d vectors)\n\n**Use Cases:** Image feature extraction, Visual similarity search, Transfer learning backbone\n\n**Strengths:** Strong image representations (25M parameters), Well-established benchmark performance, Widely used in production"
+        },
+        {
+          "const": "microsoft/resnet-101",
+          "title": "ResNet-101 (image classification)",
+          "description": "**Modalities:** Image (2048-d vectors)\n\n**Use Cases:** High-quality image feature extraction, Fine-grained visual similarity, Large-scale image retrieval\n\n**Strengths:** Higher accuracy than ResNet-50 (44M parameters), Deeper residual network, Strong ImageNet-trained representations"
+        },
+        {
+          "const": "google/vit-base-patch16-224",
+          "title": "ViT-Base Patch16 224 (Vision Transformer)",
+          "description": "**Modalities:** Image (768-d vectors)\n\n**Use Cases:** Image classification embeddings, Visual feature extraction, Semantic image retrieval\n\n**Strengths:** Transformer-based image understanding (86M parameters), Patch-based attention mechanism, Strong transfer learning capability"
+        },
+        {
+          "const": "google/vit-base-patch16-384",
+          "title": "ViT-Base Patch16 384 (Vision Transformer, high-res)",
+          "description": "**Modalities:** Image (768-d vectors)\n\n**Use Cases:** High-resolution image embeddings, Fine-detail image retrieval, Visual quality assessment\n\n**Strengths:** Higher input resolution (384×384) than 224 variant, Better fine-grained detail capture, Same efficient ViT-Base architecture"
+        },
+        {
+          "const": "google/vit-large-patch16-224",
+          "title": "ViT-Large Patch16 224 (Vision Transformer, large)",
+          "description": "**Modalities:** Image (1024-d vectors)\n\n**Use Cases:** High-accuracy image embeddings, Premium visual similarity search, Large-scale visual retrieval\n\n**Strengths:** Larger model capacity (307M parameters), Superior image representations, Higher downstream task accuracy"
+        },
+        {
+          "const": "microsoft/beit-base-patch16-384",
+          "title": "BEiT-Base Patch16 384 (BERT pre-training of ViTs)",
+          "description": "**Modalities:** Image (768-d vectors)\n\n**Use Cases:** Self-supervised image embeddings, High-resolution image retrieval, Vision pre-training tasks\n\n**Strengths:** BERT-style masked image modelling pre-training, High-resolution 384×384 input, Strong self-supervised representations"
+        },
+        {
+          "const": "microsoft/beit-base-patch16-224-pt22k-ft22k",
+          "title": "BEiT-Base Patch16 224 PT22K-FT22K (ImageNet-22K)",
+          "description": "**Modalities:** Image (768-d vectors)\n\n**Use Cases:** Broad category image retrieval, ImageNet-22K class embeddings, General-purpose image similarity\n\n**Strengths:** Pre-trained and fine-tuned on ImageNet-22K (21,841 classes), Richer visual vocabulary than ImageNet-1K models, Strong general-purpose image features"
+        },
+        {
+          "const": "microsoft/beit-large-patch16-224-pt22k-ft22k",
+          "title": "BEiT-Large Patch16 224 PT22K-FT22K (ImageNet-22K)",
+          "description": "**Modalities:** Image (1024-d vectors)\n\n**Use Cases:** Premium image similarity search, High-accuracy visual retrieval, Enterprise-grade image embeddings\n\n**Strengths:** Large model capacity (307M parameters), ImageNet-22K pre-training and fine-tuning, Best-in-class BEiT image representations"
+        },
+        {
+          "const": "sentence-transformers/all-mpnet-base-v2",
+          "title": "all-mpnet-base-v2 (Sentence Transformers)",
+          "description": "**Modalities:** Text (768-d vectors)\n\n**Use Cases:** Semantic text search, Sentence-level similarity, Semantic clustering and deduplication\n\n**Strengths:** State-of-the-art general-purpose text embeddings, Fine-tuned on 1B+ sentence pairs, Top-ranked on SBERT benchmarks for English semantic search"
         }
       ],
       "default": "openai/clip-vit-base-patch32"

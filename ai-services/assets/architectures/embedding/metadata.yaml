@@ -23,7 +23,13 @@ services:
 about:
   - title: "Services"
     values:
-      - "CLIP Embedding (text + image → 512-d vector)"
+      - "Embedding service — 12 selectable models (image, text, and multimodal)"
+      - "CLIP ViT-B/32 (default) — multimodal image + text, 512-d"
+      - "Granite Embedding 278M Multilingual — text, 768-d"
+      - "ResNet-18 / ResNet-50 / ResNet-101 — image (Microsoft)"
+      - "ViT-Base/Large Patch16 — image (Google)"
+      - "BEiT-Base/Large Patch16 — image (Microsoft)"
+      - "all-mpnet-base-v2 — text (Sentence Transformers)"
 
   - title: "Use case domains"
     sections:
